@@ -1,4 +1,6 @@
-const posts = [
+import { PostDto, CreatePostDto } from "../dto/post.js";
+
+const posts: PostDto[] = [
   {
     id: 1,
     title: "Introduction to JavaScript",
@@ -22,7 +24,10 @@ const posts = [
   }
 ];
 
-export const getAll = (category, take) => {
+export const getAll = (
+  category?: string,
+  take?: number
+): PostDto[] => {
   let result = posts;
 
   if (category) {
@@ -36,13 +41,13 @@ export const getAll = (category, take) => {
   return result;
 };
 
-export const getById = (id) => {
+export const getById = (id: number): PostDto | undefined => {
   return posts.find(post => post.id === id);
 };
 
-export const addPost = (post) => {
+export const addPost = (post: CreatePostDto): Promise<PostDto> => {
   return new Promise((resolve) => {
-    const newPost = {
+    const newPost: PostDto = {
       id: posts.length + 1,
       ...post
     };

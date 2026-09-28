@@ -2,17 +2,26 @@ import {
   getPosts,
   getPostById,
   createPost
-} from "../services/post.js";
+} from "../../services/post.js";
 
-export const getAllPosts = (req, res) => {
+import {
+  CreatePostDto
+} from "../../dto/post.js";
+
+import { Request, Response } from "express";
+
+export const getAllPosts = (req: Request, res: Response) => {
   const { category, take } = req.query;
 
-  const posts = getPosts(category, take);
+  const posts = getPosts(
+    category as string | undefined,
+    take ? Number(take) : undefined
+  );
 
   res.status(200).json(posts);
 };
 
-export const getOnePost = (req, res) => {
+export const getOnePost = (req: Request, res: Response) => {
   const id = Number(req.params.id);
 
   const post = getPostById(id);
@@ -26,8 +35,12 @@ export const getOnePost = (req, res) => {
   res.status(200).json(post);
 };
 
-export const createNewPost = async (req, res) => {
-  const { title, content, author, category } = req.body;
+export const createNewPost = async (
+  req: Request,
+  res: Response
+) => {
+  const { title, content, author, category } =
+    req.body as CreatePostDto;
 
   if (!title || !content) {
     return res.status(422).json({
