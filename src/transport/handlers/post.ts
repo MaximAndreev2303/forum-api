@@ -1,19 +1,15 @@
-import {
-  getPosts,
-  getPostById,
-  createPost
-} from "../../services/post.js";
-
-import {
-  CreatePostDto
-} from "../../dto/post.js";
-
 import { Request, Response } from "express";
+import { createPostRepository } from "../../repositories/post.js";
+import { createPostService } from "../../services/post.js";
+import { Post } from "../../domain/post/entity.js";
+
+const repository = createPostRepository();
+const service = createPostService(repository);
 
 export const getAllPosts = (req: Request, res: Response) => {
   const { category, take } = req.query;
 
-  const posts = getPosts(
+  const posts = service.getPosts(
     category as string | undefined,
     take ? Number(take) : undefined
   );
@@ -24,7 +20,7 @@ export const getAllPosts = (req: Request, res: Response) => {
 export const getOnePost = (req: Request, res: Response) => {
   const id = Number(req.params.id);
 
-  const post = getPostById(id);
+  const post = service.getPostById(id);
 
   if (!post) {
     return res.status(404).json({
@@ -40,7 +36,7 @@ export const createNewPost = async (
   res: Response
 ) => {
   const { title, content, author, category } =
-    req.body as CreatePostDto;
+    req.body as Omit<Post, "id">;
 
   if (!title || !content) {
     return res.status(422).json({
@@ -48,7 +44,7 @@ export const createNewPost = async (
     });
   }
 
-  const post = await createPost({
+  const post = await service.createPost({
     title,
     content,
     author,

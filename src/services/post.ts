@@ -1,29 +1,21 @@
-import {
-  getAll,
-  getById,
-  addPost
-} from "../repositories/post.js";
+import { Post } from "../domain/post/entity.js";
+import { Repository } from "../domain/post/repository.js";
+import { CreatePostService } from "./types.js";
 
-import {
-  PostDto,
-  CreatePostDto
-} from "../dto/post.js";
+export const createPostService: CreatePostService = (
+  repository: Repository
+) => {
+  return {
+    getPosts(category?: string, take?: number): Post[] {
+      return repository.getAll(category, take);
+    },
 
-export const getPosts = (
-  category?: string,
-  take?: number
-): PostDto[] => {
-  return getAll(category, take);
-};
+    getPostById(id: number): Post | undefined {
+      return repository.getById(id);
+    },
 
-export const getPostById = (
-  id: number
-): PostDto | undefined => {
-  return getById(id);
-};
-
-export const createPost = (
-  post: CreatePostDto
-): Promise<PostDto> => {
-  return addPost(post);
+    createPost(post: Omit<Post, "id">): Promise<Post> {
+      return repository.addPost(post);
+    }
+  };
 };
