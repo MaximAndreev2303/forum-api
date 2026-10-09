@@ -1,10 +1,11 @@
+
 import { Request, Response } from "express";
 import { Post } from "../../domain/post/entity.js";
 import { PostService } from "../../services/types.js";
 
 export interface PostHandlers {
-  getAllPosts(req: Request, res: Response): void;
-  getOnePost(req: Request, res: Response): void;
+  getAllPosts(req: Request, res: Response): Promise<void>;
+  getOnePost(req: Request, res: Response): Promise<void>;
   createNewPost(req: Request, res: Response): Promise<void>;
 }
 
@@ -12,10 +13,10 @@ export const createPostHandlers = (
   service: PostService
 ): PostHandlers => {
   return {
-    getAllPosts(req: Request, res: Response) {
+    async getAllPosts(req: Request, res: Response): Promise<void> {
       const { category, take } = req.query;
 
-      const posts = service.getPosts(
+      const posts = await service.getPosts(
         category as string | undefined,
         take ? Number(take) : undefined
       );
@@ -23,10 +24,10 @@ export const createPostHandlers = (
       res.status(200).json(posts);
     },
 
-    getOnePost(req: Request, res: Response) {
+    async getOnePost(req: Request, res: Response): Promise<void> {
       const id = Number(req.params.id);
 
-      const post = service.getPostById(id);
+      const post = await service.getPostById(id);
 
       if (!post) {
         res.status(404).json({
@@ -38,7 +39,7 @@ export const createPostHandlers = (
       res.status(200).json(post);
     },
 
-    async createNewPost(req: Request, res: Response) {
+    async createNewPost(req: Request, res: Response): Promise<void> {
       const { title, content, author, category } =
         req.body as Omit<Post, "id">;
 
