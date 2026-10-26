@@ -14,7 +14,8 @@
     "express": "^5.2.1"
   },
   "scripts": {
-    "contract:emit": "prisma contract emit"
+    "contract:emit": "prisma contract emit",
+    "start": "tsx src/app.ts"
   },
   "type": "module"
 }

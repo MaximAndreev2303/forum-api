@@ -1,9 +1,10 @@
-
 import { Post } from "../domain/post/entity.js";
 import { Repository } from "../domain/post/repository.js";
-import { CreatePostService } from "./types.js";
+import { PostService, CreatePostService } from "./types.js";
 
-export const createPostService: CreatePostService = (repository: Repository) => {
+export const createPostService: CreatePostService = (
+  repository: Repository
+): PostService => {
   return {
     getPosts(category?: string, take?: number): Promise<Post[]> {
       return repository.getAll(category, take);
@@ -13,8 +14,10 @@ export const createPostService: CreatePostService = (repository: Repository) => 
       return repository.getById(id);
     },
 
-    createPost(post: Omit<Post, "id">): Promise<Post> {
+    createPost(
+      post: Omit<Post, "id" | "categoryId"> & { categoryId: number }
+    ): Promise<Post> {
       return repository.addPost(post);
-    }
+    },
   };
 };

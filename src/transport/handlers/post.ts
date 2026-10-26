@@ -1,6 +1,5 @@
 
 import { Request, Response } from "express";
-import { Post } from "../../domain/post/entity.js";
 import { PostService } from "../../services/types.js";
 
 export interface PostHandlers {
@@ -17,8 +16,8 @@ export const createPostHandlers = (
       const { category, take } = req.query;
 
       const posts = await service.getPosts(
-        category as string | undefined,
-        take ? Number(take) : undefined
+        typeof category === "string" ? category : undefined,
+        typeof take === "string" ? Number(take) : undefined
       );
 
       res.status(200).json(posts);
@@ -27,12 +26,15 @@ export const createPostHandlers = (
     async getOnePost(req: Request, res: Response): Promise<void> {
       const id = Number(req.params.id);
 
+      if (!Number.isInteger(id) || id <= 0) {
+        res.status(400).json({ message: "Invalid post id" });
+        return;
+      }
+
       const post = await service.getPostById(id);
 
       if (!post) {
-        res.status(404).json({
-          message: "Post not found"
-        });
+        res.status(404).json({ message: "Post not found" });
         return;
       }
 
@@ -40,24 +42,35 @@ export const createPostHandlers = (
     },
 
     async createNewPost(req: Request, res: Response): Promise<void> {
-      const { title, content, author, category } =
-        req.body as Omit<Post, "id">;
+      const { title, content, author, categoryId } = req.body;
 
-      if (!title || !content) {
-        res.status(422).json({
-          message: "Title and content are required"
-        });
+      if (
+        typeof title !== "string" || !title.trim() ||
+        typeof content !== "string" || !content.trim() ||
+        typeof author !== "string" || !author.trim()
+      ) {
+        res.status(422).json({ message: "Invalid post data" });
         return;
       }
 
-      const post = await service.createPost({
-        title,
-        content,
-        author,
-        category
-      });
+      if (!Number.isInteger(categoryId) || categoryId <= 0) {
+        res.status(400).json({ message: "Invalid categoryId" });
+        return;
+      }
 
-      res.status(201).json(post);
-    }
+      try {
+        const post = await service.createPost({
+          title: title.trim(),
+          content: content.trim(),
+          author: author.trim(),
+          categoryId,
+        });
+
+        res.status(201).json(post);
+      } catch (error) {
+        console.error(error);
+      res.status(500).json({ message: "Failed to create post" });
+      }
+    },
   };
 };
