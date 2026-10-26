@@ -1,4 +1,3 @@
-
 import { Request, Response } from "express";
 import { PostService } from "../../services/types.js";
 
@@ -42,12 +41,11 @@ export const createPostHandlers = (
     },
 
     async createNewPost(req: Request, res: Response): Promise<void> {
-      const { title, content, author, categoryId } = req.body;
+      const { title, content, authorId, categoryId } = req.body;
 
       if (
         typeof title !== "string" || !title.trim() ||
-        typeof content !== "string" || !content.trim() ||
-        typeof author !== "string" || !author.trim()
+        typeof content !== "string" || !content.trim()
       ) {
         res.status(422).json({ message: "Invalid post data" });
         return;
@@ -58,18 +56,23 @@ export const createPostHandlers = (
         return;
       }
 
+      if (!Number.isInteger(authorId) || authorId <= 0) {
+        res.status(400).json({ message: "Invalid authorId" });
+        return;
+      }
+
       try {
         const post = await service.createPost({
           title: title.trim(),
           content: content.trim(),
-          author: author.trim(),
+          authorId,
           categoryId,
         });
 
         res.status(201).json(post);
       } catch (error) {
         console.error(error);
-      res.status(500).json({ message: "Failed to create post" });
+        res.status(500).json({ message: "Failed to create post" });
       }
     },
   };
